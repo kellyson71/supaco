@@ -1,6 +1,8 @@
 import { MotionConfig } from 'framer-motion'
 import { Nav } from './components/Nav'
 import { Hero } from './components/Hero'
+import { Band } from './components/Band'
+import { Tour } from './components/Tour'
 import { CloudFilter } from './components/Sky'
 
 export default function App() {
@@ -10,6 +12,8 @@ export default function App() {
       <Nav />
       <main>
         <Hero />
+        <Band />
+        <Tour />
       </main>
     </MotionConfig>
   )
