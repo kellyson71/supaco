@@ -4,6 +4,7 @@ import { Hero } from './components/Hero'
 import { Band } from './components/Band'
 import { Tour } from './components/Tour'
 import { Alerts } from './components/Alerts'
+import { Ecosystem } from './components/Ecosystem'
 import { CloudFilter } from './components/Sky'
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
         <Band />
         <Tour />
         <Alerts />
+        <Ecosystem />
       </main>
     </MotionConfig>
   )
