@@ -5,6 +5,7 @@ import { Band } from './components/Band'
 import { Tour } from './components/Tour'
 import { Alerts } from './components/Alerts'
 import { Ecosystem } from './components/Ecosystem'
+import { Download } from './components/Download'
 import { CloudFilter } from './components/Sky'
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
         <Tour />
         <Alerts />
         <Ecosystem />
+        <Download />
       </main>
     </MotionConfig>
   )
