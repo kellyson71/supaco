@@ -1,0 +1,12 @@
+[submodule "projetos/supaco-mobile"]
+	path = projetos/supaco-mobile
+	url = https://github.com/kellyson71/supaco-mobile.git
+[submodule "projetos/supaco-cli"]
+	path = projetos/supaco-cli
+	url = https://github.com/kellyson71/supaco-cli.git
+[submodule "projetos/supaco-web"]
+	path = projetos/supaco-web
+	url = https://github.com/kellyson71/electron_supaco_IFRN-API.git
+[submodule "projetos/suapy"]
+	path = projetos/suapy
+	url = https://github.com/kellyson71/suapy.git
