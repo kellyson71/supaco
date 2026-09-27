@@ -1,5 +1,5 @@
-import { motion, useReducedMotion, type MotionValue } from 'framer-motion'
-import type { CSSProperties } from 'react'
+import { AnimatePresence, motion, useReducedMotion, type MotionValue, type Transition } from 'framer-motion'
+import type { CSSProperties, ReactNode } from 'react'
 import type { Status } from '../lib/verdicts'
 import { VERDICTS } from '../lib/verdicts'
 
@@ -50,6 +50,30 @@ export function CloudBank({ puffs = FRONT, className = '', style }: { puffs?: Pu
   )
 }
 
+// Troca de cor sem repintar a cada frame: cada cor vira uma camada própria,
+// rasterizada uma vez só, e a transição anima apenas a opacidade (compositor).
+// Com plus-lighter as camadas somam exatamente 100%, sem clarão nem buraco no meio,
+// mas só porque todas têm a mesma forma: aqui muda a cor, nunca a geometria.
+export function ColorCrossfade({ id, transition, className, children }: { id: string; transition: Transition; className: string; children: ReactNode }) {
+  return (
+    <div className={`isolate ${className}`}>
+      <AnimatePresence initial={false}>
+        <motion.div
+          key={id}
+          className="absolute inset-0"
+          style={{ mixBlendMode: 'plus-lighter', willChange: 'opacity' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={transition}
+        >
+          {children}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  )
+}
+
 export function Sky({ status, shift }: { status: Status; shift?: MotionValue<number> }) {
   const v = VERDICTS[status]
   const reduce = useReducedMotion()
@@ -57,21 +81,19 @@ export function Sky({ status, shift }: { status: Status; shift?: MotionValue<num
   const t = reduce ? { duration: 0 } : SKY_EASE
 
   return (
-    <motion.div
-      className="absolute inset-0"
-      initial={false}
-      animate={{ '--top': v.sky.top, '--mid': v.sky.mid, '--low': v.sky.low } as never}
-      transition={t}
-      style={{ background: 'linear-gradient(180deg, var(--top) 0%, var(--mid) 58%, var(--low) 100%)' }}
-      aria-hidden
-    >
+    <div className="absolute inset-0" aria-hidden>
+      <ColorCrossfade id={status} transition={t} className="absolute inset-0">
+        <div className="size-full" style={{ background: `linear-gradient(180deg, ${v.sky.top} 0%, ${v.sky.mid} 58%, ${v.sky.low} 100%)` }} />
+      </ColorCrossfade>
+
       {/* sol / brilho */}
-      <motion.div
-        className="absolute -right-[20%] -top-[18%] aspect-square w-[90%] rounded-full mix-blend-screen blur-3xl lg:w-[55%] lg:-right-[5%]"
-        initial={false}
-        animate={{ backgroundColor: v.sky.sun }}
+      <ColorCrossfade
+        id={status}
         transition={t}
-      />
+        className="absolute -right-[20%] -top-[18%] aspect-square w-[90%] mix-blend-screen lg:w-[55%] lg:-right-[5%]"
+      >
+        <div className="size-full rounded-full blur-3xl" style={{ backgroundColor: v.sky.sun }} />
+      </ColorCrossfade>
 
       {/* estrelas quando escurece */}
       <motion.div
@@ -80,21 +102,18 @@ export function Sky({ status, shift }: { status: Status; shift?: MotionValue<num
         animate={{ opacity: dark ? 1 : 0 }}
         transition={t}
         style={{
+          willChange: 'opacity',
           backgroundImage:
             'radial-gradient(1.2px 1.2px at 12% 18%, #fff 50%, transparent), radial-gradient(1px 1px at 34% 8%, #fff 50%, transparent), radial-gradient(1.4px 1.4px at 58% 22%, #fff 50%, transparent), radial-gradient(1px 1px at 76% 12%, #fff 50%, transparent), radial-gradient(1.2px 1.2px at 88% 30%, #fff 50%, transparent), radial-gradient(1px 1px at 22% 36%, #fff 50%, transparent), radial-gradient(1px 1px at 66% 40%, #fff 50%, transparent)',
         }}
       />
 
       {/* nuvens distantes */}
-      <motion.div
-        className="absolute inset-x-0 top-[12%] h-[40%]"
-        style={{ x: shift }}
-        initial={false}
-        animate={{ '--cloud': v.sky.cloud } as never}
-        transition={t}
-      >
+      <motion.div className="absolute inset-x-0 top-[12%] h-[40%]" style={{ x: shift }}>
         <div className="drift absolute inset-0" style={{ '--dur': '60s' } as CSSProperties}>
-          <CloudBank puffs={FAR} className="inset-0" />
+          <ColorCrossfade id={status} transition={t} className="absolute inset-0">
+            <CloudBank puffs={FAR} className="inset-0" style={{ '--cloud': v.sky.cloud } as CSSProperties} />
+          </ColorCrossfade>
         </div>
       </motion.div>
 
@@ -109,6 +128,6 @@ export function Sky({ status, shift }: { status: Status; shift?: MotionValue<num
       )}
 
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><filter id=%22n%22><feTurbulence baseFrequency=%22.9%22/></filter><rect width=%22120%22 height=%22120%22 filter=%22url(%23n)%22 opacity=%22.06%22/></svg>')]" />
-    </motion.div>
+    </div>
   )
 }

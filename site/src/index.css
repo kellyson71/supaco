@@ -57,7 +57,6 @@
     border-radius: 50%;
     background: var(--cloud, #fff);
     filter: url(#cloud-edge) blur(2px);
-    transition: background-color 1.2s ease;
   }
 
   .no-scrollbar {

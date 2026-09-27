@@ -1,7 +1,7 @@
 import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { LIMITE, TOUR, VERDICTS, calcStatus } from '../lib/verdicts'
-import { CloudBank, Sky } from './Sky'
+import { CloudBank, ColorCrossfade, Sky } from './Sky'
 import { LiveHomeScreen, PhoneFrame } from './Phone'
 import { ApkButton } from './ui'
 import { useTilt } from '../lib/tilt'
@@ -212,15 +212,11 @@ export function Hero() {
 
       {/* nuvens na frente do celular: tingidas pelo céu, e uma última camada da cor da página */}
       <motion.div style={{ y: cloudsY, x: cloudsX }} className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-56 sm:h-72 lg:h-80">
-        <motion.div
-          className="drift absolute -inset-x-[10%] top-0 h-full"
-          initial={false}
-          animate={{ '--cloud': VERDICTS[status].sky.cloud } as never}
-          transition={{ duration: 1.4 }}
-          style={{ '--dur': '36s' } as CSSProperties}
-        >
-          <CloudBank className="inset-0" />
-        </motion.div>
+        <div className="drift absolute -inset-x-[10%] top-0 h-full" style={{ '--dur': '36s' } as CSSProperties}>
+          <ColorCrossfade id={status} transition={{ duration: 1.4 }} className="absolute inset-0">
+            <CloudBank className="inset-0" style={{ '--cloud': VERDICTS[status].sky.cloud } as CSSProperties} />
+          </ColorCrossfade>
+        </div>
       </motion.div>
       <CloudBank
         className="-inset-x-[10%] -bottom-10 z-20 h-32 sm:h-40"
