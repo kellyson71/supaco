@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion, type MotionValue, type Transition } from 'framer-motion'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import type { Status } from '../lib/verdicts'
 import { VERDICTS } from '../lib/verdicts'
 
@@ -36,25 +36,38 @@ const FAR: Puff[] = [
   { x: 30, y: 36, w: 16, h: 14, o: 0.45 },
 ]
 
-export function CloudBank({ puffs = FRONT, className = '', style }: { puffs?: Puff[]; className?: string; style?: CSSProperties }) {
+// Borda de nuvens na cor da página, que funde uma seção com a seguinte
+const EDGE: Puff[] = [
+  { x: 0, y: 30, w: 30, h: 90 },
+  { x: 24, y: 45, w: 34, h: 80 },
+  { x: 52, y: 25, w: 30, h: 100 },
+  { x: 76, y: 40, w: 30, h: 90 },
+  { x: -5, y: 70, w: 110, h: 80 },
+]
+
+function CloudBank({ puffs, color, className }: { puffs: Puff[]; color: string; className: string }) {
   return (
-    <div className={`pointer-events-none absolute ${className}`} style={style} aria-hidden>
+    <div className={`pointer-events-none absolute ${className}`} aria-hidden>
       {puffs.map((p, i) => (
         <div
           key={i}
           className="puff"
-          style={{ left: `${p.x}%`, top: `${p.y}%`, width: `${p.w}%`, height: `${p.h}%`, opacity: p.o ?? 1 }}
+          style={{ left: `${p.x}%`, top: `${p.y}%`, width: `${p.w}%`, height: `${p.h}%`, opacity: p.o ?? 1, background: color }}
         />
       ))}
     </div>
   )
 }
 
+export function EdgeClouds({ className }: { className: string }) {
+  return <CloudBank puffs={EDGE} color="var(--color-cloud)" className={className} />
+}
+
 // Troca de cor sem repintar a cada frame: cada cor vira uma camada própria,
 // rasterizada uma vez só, e a transição anima apenas a opacidade (compositor).
 // Com plus-lighter as camadas somam exatamente 100%, sem clarão nem buraco no meio,
 // mas só porque todas têm a mesma forma: aqui muda a cor, nunca a geometria.
-export function ColorCrossfade({ id, transition, className, children }: { id: string; transition: Transition; className: string; children: ReactNode }) {
+function ColorCrossfade({ id, transition, className, children }: { id: string; transition: Transition; className: string; children: ReactNode }) {
   return (
     <div className={`isolate ${className}`}>
       <AnimatePresence initial={false}>
@@ -74,11 +87,26 @@ export function ColorCrossfade({ id, transition, className, children }: { id: st
   )
 }
 
+function useSkyTransition(): Transition {
+  return useReducedMotion() ? { duration: 0 } : SKY_EASE
+}
+
+// Banco de nuvens à deriva, tingido pela cor do céu do veredito
+export function SkyClouds({ status, puffs = FRONT, duration, className }: { status: Status; puffs?: Puff[]; duration: number; className: string }) {
+  return (
+    <div className={`drift absolute ${className}`} style={{ animationDuration: `${duration}s` }}>
+      <ColorCrossfade id={status} transition={useSkyTransition()} className="absolute inset-0">
+        <CloudBank puffs={puffs} color={VERDICTS[status].sky.cloud} className="inset-0" />
+      </ColorCrossfade>
+    </div>
+  )
+}
+
 export function Sky({ status, shift }: { status: Status; shift?: MotionValue<number> }) {
   const v = VERDICTS[status]
   const reduce = useReducedMotion()
   const dark = status === 'NO' || status === 'REPROVADO'
-  const t = reduce ? { duration: 0 } : SKY_EASE
+  const t = useSkyTransition()
 
   return (
     <div className="absolute inset-0" aria-hidden>
@@ -110,11 +138,7 @@ export function Sky({ status, shift }: { status: Status; shift?: MotionValue<num
 
       {/* nuvens distantes */}
       <motion.div className="absolute inset-x-0 top-[12%] h-[40%]" style={{ x: shift }}>
-        <div className="drift absolute inset-0" style={{ '--dur': '60s' } as CSSProperties}>
-          <ColorCrossfade id={status} transition={t} className="absolute inset-0">
-            <CloudBank puffs={FAR} className="inset-0" style={{ '--cloud': v.sky.cloud } as CSSProperties} />
-          </ColorCrossfade>
-        </div>
+        <SkyClouds status={status} puffs={FAR} duration={60} className="inset-0" />
       </motion.div>
 
       {/* relâmpago */}

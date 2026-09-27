@@ -55,7 +55,6 @@
   .puff {
     position: absolute;
     border-radius: 50%;
-    background: var(--cloud, #fff);
     filter: url(#cloud-edge) blur(2px);
   }
 
@@ -77,7 +76,7 @@
   to { transform: translateX(6%); }
 }
 .drift {
-  animation: drift var(--dur, 40s) ease-in-out infinite alternate;
+  animation: drift 40s ease-in-out infinite alternate;
   will-change: transform;
 }
 

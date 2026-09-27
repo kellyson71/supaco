@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion'
 import QRCode from 'qrcode'
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useEffect, useState } from 'react'
 import { RELEASES_URL, REPO, useRelease } from '../lib/release'
 import { VERDICTS } from '../lib/verdicts'
-import { CloudBank } from './Sky'
+import { EdgeClouds } from './Sky'
 import { ApkButton, GithubIcon, Logo } from './ui'
 
 const STEPS = [
@@ -37,17 +37,7 @@ export function Download() {
       className="relative mt-4 overflow-hidden pb-16 pt-28 text-white lg:pt-36"
       style={{ background: `linear-gradient(180deg, #eef2f8 0%, ${go.low} 12%, ${go.mid} 45%, ${go.top} 100%)` }}
     >
-      <CloudBank
-        className="-inset-x-[10%] -top-6 h-40 rotate-180"
-        style={{ '--cloud': '#eef2f8' } as CSSProperties}
-        puffs={[
-          { x: 0, y: 30, w: 30, h: 90 },
-          { x: 24, y: 45, w: 34, h: 80 },
-          { x: 52, y: 25, w: 30, h: 100 },
-          { x: 76, y: 40, w: 30, h: 90 },
-          { x: -5, y: 70, w: 110, h: 80 },
-        ]}
-      />
+      <EdgeClouds className="-inset-x-[10%] -top-6 h-40 rotate-180" />
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">

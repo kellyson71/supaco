@@ -1,7 +1,7 @@
 import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useTransform } from 'framer-motion'
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { LIMITE, TOUR, VERDICTS, calcStatus } from '../lib/verdicts'
-import { CloudBank, ColorCrossfade, Sky } from './Sky'
+import { EdgeClouds, Sky, SkyClouds } from './Sky'
 import { LiveHomeScreen, PhoneFrame } from './Phone'
 import { ApkButton } from './ui'
 import { useTilt } from '../lib/tilt'
@@ -212,23 +212,9 @@ export function Hero() {
 
       {/* nuvens na frente do celular: tingidas pelo céu, e uma última camada da cor da página */}
       <motion.div style={{ y: cloudsY, x: cloudsX }} className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-56 sm:h-72 lg:h-80">
-        <div className="drift absolute -inset-x-[10%] top-0 h-full" style={{ '--dur': '36s' } as CSSProperties}>
-          <ColorCrossfade id={status} transition={{ duration: 1.4 }} className="absolute inset-0">
-            <CloudBank className="inset-0" style={{ '--cloud': VERDICTS[status].sky.cloud } as CSSProperties} />
-          </ColorCrossfade>
-        </div>
+        <SkyClouds status={status} duration={36} className="-inset-x-[10%] top-0 h-full" />
       </motion.div>
-      <CloudBank
-        className="-inset-x-[10%] -bottom-10 z-20 h-32 sm:h-40"
-        style={{ '--cloud': '#eef2f8' } as CSSProperties}
-        puffs={[
-          { x: 0, y: 30, w: 30, h: 90 },
-          { x: 24, y: 45, w: 34, h: 80 },
-          { x: 52, y: 25, w: 30, h: 100 },
-          { x: 76, y: 40, w: 30, h: 90 },
-          { x: -5, y: 70, w: 110, h: 80 },
-        ]}
-      />
+      <EdgeClouds className="-inset-x-[10%] -bottom-10 z-20 h-32 sm:h-40" />
     </section>
   )
 }
