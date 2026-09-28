@@ -1,4 +1,4 @@
-import { motion, useMotionValueEvent, useScroll } from 'framer-motion'
+import { m, useMotionValueEvent, useScroll } from 'framer-motion'
 import { useState } from 'react'
 import { ApkButton, Logo } from './ui'
 
@@ -15,15 +15,15 @@ export function Nav() {
   useMotionValueEvent(scrollY, 'change', (y) => setSolid(y > 40))
 
   return (
-    <motion.header
+    <m.header
       className="fixed inset-x-0 top-0 z-50 px-3 pt-[max(0.75rem,env(safe-area-inset-top))]"
       initial={{ y: -80 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
     >
       <nav
-        className={`mx-auto flex max-w-6xl items-center justify-between rounded-full py-2 pl-2 pr-2 text-white transition-[background-color,box-shadow,backdrop-filter] duration-300 ${
-          solid ? 'bg-ink/80 shadow-lg shadow-black/10 backdrop-blur-xl' : 'bg-transparent'
+        className={`mx-auto flex max-w-6xl items-center justify-between rounded-full py-2 pl-2 pr-2 text-white transition-[background-color,box-shadow] duration-300 ${
+          solid ? 'frost shadow-lg shadow-black/10' : 'bg-transparent'
         }`}
       >
         <a href="#" className="flex items-center gap-2.5 pl-1 font-display text-[15px] font-bold tracking-tight">
@@ -41,6 +41,6 @@ export function Nav() {
         </ul>
         <ApkButton size="sm" />
       </nav>
-    </motion.header>
+    </m.header>
   )
 }

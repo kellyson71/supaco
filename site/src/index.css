@@ -45,19 +45,27 @@
 }
 
 @layer components {
+  /* Vidro: desfoque ao vivo só em desktop com mouse e fora do Firefox.
+     No celular e no Firefox o backdrop-filter sobre o céu animado custa caro,
+     então vira um fundo translúcido mais opaco. */
   .glass {
-    background: rgb(255 255 255 / 0.16);
+    background: rgb(255 255 255 / 0.2);
     border: 1px solid rgb(255 255 255 / 0.28);
-    backdrop-filter: blur(18px) saturate(1.3);
-    -webkit-backdrop-filter: blur(18px) saturate(1.3);
   }
-
-  .puff {
-    position: absolute;
-    border-radius: 50%;
-    background: var(--cloud, #fff);
-    filter: url(#cloud-edge) blur(2px);
-    transition: background-color 1.2s ease;
+  .frost {
+    background: rgb(18 19 24 / 0.82);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    @supports (backdrop-filter: blur(1px)) and (not (-moz-appearance: none)) {
+      .glass {
+        background: rgb(255 255 255 / 0.16);
+        backdrop-filter: blur(14px);
+      }
+      .frost {
+        background: rgb(18 19 24 / 0.5);
+        backdrop-filter: blur(20px) saturate(1.4);
+      }
+    }
   }
 
   .no-scrollbar {
@@ -80,6 +88,9 @@
 .drift {
   animation: drift var(--dur, 40s) ease-in-out infinite alternate;
   will-change: transform;
+}
+[data-paused='true'] .drift {
+  animation-play-state: paused;
 }
 
 @keyframes line-in {

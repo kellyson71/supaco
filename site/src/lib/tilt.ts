@@ -2,7 +2,7 @@ import { useMotionValue, useReducedMotion, useSpring, type MotionValue } from 'f
 import { useEffect, type RefObject } from 'react'
 
 // Posição do ponteiro (ou inclinação do celular) normalizada em -1..1
-export function useTilt(ref: RefObject<HTMLElement | null>): { x: MotionValue<number>; y: MotionValue<number> } {
+export function useTilt(ref: RefObject<HTMLElement | null>, active = true): { x: MotionValue<number>; y: MotionValue<number> } {
   const reduce = useReducedMotion()
   const rawX = useMotionValue(0)
   const rawY = useMotionValue(0)
@@ -11,7 +11,7 @@ export function useTilt(ref: RefObject<HTMLElement | null>): { x: MotionValue<nu
 
   useEffect(() => {
     const el = ref.current
-    if (!el || reduce) return
+    if (!el || reduce || !active) return
 
     const onMove = (e: PointerEvent) => {
       if (e.pointerType !== 'mouse') return
@@ -24,10 +24,14 @@ export function useTilt(ref: RefObject<HTMLElement | null>): { x: MotionValue<nu
       rawY.set(0)
     }
     // No Android o giroscópio chega sem pedir permissão
+    const set = (x: number, y: number) => {
+      // variações mínimas do sensor não viram frame novo
+      if (Math.abs(x - rawX.get()) > 0.03) rawX.set(x)
+      if (Math.abs(y - rawY.get()) > 0.03) rawY.set(y)
+    }
     const onOrient = (e: DeviceOrientationEvent) => {
       if (e.gamma == null || e.beta == null) return
-      rawX.set(Math.max(-1, Math.min(1, e.gamma / 25)))
-      rawY.set(Math.max(-1, Math.min(1, (e.beta - 45) / 25)))
+      set(Math.max(-1, Math.min(1, e.gamma / 25)), Math.max(-1, Math.min(1, (e.beta - 45) / 25)))
     }
 
     el.addEventListener('pointermove', onMove)
@@ -38,7 +42,7 @@ export function useTilt(ref: RefObject<HTMLElement | null>): { x: MotionValue<nu
       el.removeEventListener('pointerleave', onLeave)
       window.removeEventListener('deviceorientation', onOrient)
     }
-  }, [ref, reduce, rawX, rawY])
+  }, [ref, reduce, active, rawX, rawY])
 
   return { x, y }
 }

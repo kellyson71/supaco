@@ -1,6 +1,5 @@
-import { motion } from 'framer-motion'
-import QRCode from 'qrcode'
-import { useEffect, useState, type CSSProperties } from 'react'
+import { m } from 'framer-motion'
+import { useEffect, useState } from 'react'
 import { RELEASES_URL, REPO, useRelease } from '../lib/release'
 import { VERDICTS } from '../lib/verdicts'
 import { CloudBank } from './Sky'
@@ -23,7 +22,11 @@ function Qr() {
   const { apkUrl } = useRelease()
   const [svg, setSvg] = useState('')
   useEffect(() => {
-    QRCode.toString(apkUrl, { type: 'svg', margin: 0, color: { dark: '#121318', light: '#0000' } }).then(setSvg)
+    // a lib de QR só é baixada no desktop, onde o card aparece
+    if (!matchMedia('(min-width: 1024px)').matches) return
+    import('qrcode')
+      .then((QRCode) => QRCode.toString(apkUrl, { type: 'svg', margin: 0, color: { dark: '#121318', light: '#0000' } }))
+      .then(setSvg)
   }, [apkUrl])
   return <div className="size-full [&>svg]:size-full" dangerouslySetInnerHTML={{ __html: svg }} />
 }
@@ -37,28 +40,18 @@ export function Download() {
       className="relative mt-4 overflow-hidden pb-16 pt-28 text-white lg:pt-36"
       style={{ background: `linear-gradient(180deg, #eef2f8 0%, ${go.low} 12%, ${go.mid} 45%, ${go.top} 100%)` }}
     >
-      <CloudBank
-        className="-inset-x-[10%] -top-6 h-40 rotate-180"
-        style={{ '--cloud': '#eef2f8' } as CSSProperties}
-        puffs={[
-          { x: 0, y: 30, w: 30, h: 90 },
-          { x: 24, y: 45, w: 34, h: 80 },
-          { x: 52, y: 25, w: 30, h: 100 },
-          { x: 76, y: 40, w: 30, h: 90 },
-          { x: -5, y: 70, w: 110, h: 80 },
-        ]}
-      />
+      <CloudBank variant="floor" color="#eef2f8" className="-inset-x-[10%] -top-6 h-40 rotate-180" />
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.5 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="mb-8 flex items-center gap-4">
-              <motion.img
+              <m.img
                 src="./assets/brand/app-icon.svg"
                 alt="Ícone do Supaco"
                 className="size-20 rounded-[26%] shadow-[0_20px_40px_-12px_rgb(30_122_71/0.7)] sm:size-24"
@@ -87,10 +80,10 @@ export function Download() {
                 Todas as versões
               </a>
             </div>
-          </motion.div>
+          </m.div>
 
-          <motion.div
-            className="hidden items-center gap-4 rounded-[28px] bg-white/85 p-4 pr-6 text-ink backdrop-blur-xl lg:flex"
+          <m.div
+            className="hidden items-center gap-4 rounded-[28px] bg-white/90 p-4 pr-6 text-ink lg:flex"
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -103,12 +96,12 @@ export function Download() {
               <strong className="block font-semibold">Tá no computador?</strong>
               Aponte a câmera do celular e o download começa lá.
             </p>
-          </motion.div>
+          </m.div>
         </div>
 
         <ol className="mt-16 grid gap-3 lg:mt-24 lg:grid-cols-3">
           {STEPS.map((s, i) => (
-            <motion.li
+            <m.li
               key={s.title}
               className="glass rounded-[26px] p-5"
               initial={{ opacity: 0, y: 30 }}
@@ -119,7 +112,7 @@ export function Download() {
               <span className="grid size-8 place-items-center rounded-full bg-white font-display text-sm font-bold text-ink">{i + 1}</span>
               <h3 className="mt-4 text-[17px] font-semibold">{s.title}</h3>
               <p className="mt-1 text-[14px] leading-snug text-white/80">{s.text}</p>
-            </motion.li>
+            </m.li>
           ))}
         </ol>
 

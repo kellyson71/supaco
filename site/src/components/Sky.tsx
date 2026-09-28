@@ -1,114 +1,111 @@
-import { motion, useReducedMotion, type MotionValue } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion, type MotionValue } from 'framer-motion'
 import type { CSSProperties } from 'react'
 import type { Status } from '../lib/verdicts'
 import { VERDICTS } from '../lib/verdicts'
 
 const SKY_EASE = { duration: 1.4, ease: [0.4, 0, 0.2, 1] } as const
 
-// Filtro SVG que dá borda orgânica às "nuvens" (círculos borrados)
-export function CloudFilter() {
+// As nuvens são texturas pré-renderizadas e já coloridas (public/assets/sky),
+// uma por cor e por faixa de tela. Trocar de cor = crossfade de duas imagens
+// comuns, o caso mais barato para a GPU em qualquer navegador.
+type Variant = 'front' | 'far' | 'floor'
+
+const hex = (c: string) => c.replace('#', '').toLowerCase()
+const src = (variant: Variant, bp: 'sm' | 'md' | 'lg', color: string) => `./assets/sky/${variant}-${bp}-${hex(color)}.webp`
+
+function CloudImage({ variant, color, className = '' }: { variant: Variant; color: string; className?: string }) {
   return (
-    <svg width="0" height="0" className="absolute" aria-hidden>
-      <filter id="cloud-edge" x="-30%" y="-30%" width="160%" height="160%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.011" numOctaves="4" seed="7" />
-        <feDisplacementMap in="SourceGraphic" scale="80" />
-        <feGaussianBlur stdDeviation="10" />
-      </filter>
-    </svg>
+    <picture className={className}>
+      <source media="(min-width: 1024px)" srcSet={src(variant, 'lg', color)} />
+      <source media="(min-width: 640px)" srcSet={src(variant, 'md', color)} />
+      <img src={src(variant, 'sm', color)} alt="" decoding="async" draggable={false} className="size-full select-none" />
+    </picture>
   )
 }
 
-type Puff = { x: number; y: number; w: number; h: number; o?: number }
+// baixa as outras cores no tempo ocioso, para a troca não piscar
+export function preloadClouds(colors: string[]) {
+  const bp = matchMedia('(min-width: 1024px)').matches ? 'lg' : matchMedia('(min-width: 640px)').matches ? 'md' : 'sm'
+  const run = () => colors.forEach((c) => (['front', 'far'] as const).forEach((v) => (new Image().src = src(v, bp, c))))
+  'requestIdleCallback' in window ? requestIdleCallback(run) : setTimeout(run, 1500)
+}
 
-// Coordenadas em % da largura do banco de nuvens
-const FRONT: Puff[] = [
-  { x: -8, y: 38, w: 34, h: 70 },
-  { x: 14, y: 50, w: 30, h: 60 },
-  { x: 32, y: 30, w: 34, h: 80 },
-  { x: 55, y: 46, w: 30, h: 64 },
-  { x: 72, y: 26, w: 38, h: 84 },
-  { x: -4, y: 70, w: 110, h: 60 },
-]
+type CloudProps = { variant: Variant; color: string; className?: string; style?: CSSProperties; animated?: boolean }
 
-const FAR: Puff[] = [
-  { x: 4, y: 10, w: 22, h: 26, o: 0.7 },
-  { x: 62, y: 22, w: 26, h: 22, o: 0.55 },
-  { x: 30, y: 36, w: 16, h: 14, o: 0.45 },
-]
-
-export function CloudBank({ puffs = FRONT, className = '', style }: { puffs?: Puff[]; className?: string; style?: CSSProperties }) {
+export function CloudBank({ variant, color, className = '', style, animated = false }: CloudProps) {
+  if (!animated)
+    return (
+      <div className={`pointer-events-none absolute ${className}`} style={style} aria-hidden>
+        <CloudImage variant={variant} color={color} className="absolute inset-0 block" />
+      </div>
+    )
   return (
     <div className={`pointer-events-none absolute ${className}`} style={style} aria-hidden>
-      {puffs.map((p, i) => (
-        <div
-          key={i}
-          className="puff"
-          style={{ left: `${p.x}%`, top: `${p.y}%`, width: `${p.w}%`, height: `${p.h}%`, opacity: p.o ?? 1 }}
-        />
-      ))}
+      <AnimatePresence initial={false}>
+        <m.div
+          key={color}
+          className="absolute inset-0 will-change-[opacity]"
+          initial={{ opacity: 0, zIndex: 1 }}
+          animate={{ opacity: 1, zIndex: 1, transition: SKY_EASE }}
+          exit={{ opacity: 1, zIndex: 0, transition: { duration: SKY_EASE.duration } }}
+        >
+          <CloudImage variant={variant} color={color} className="absolute inset-0 block" />
+        </m.div>
+      </AnimatePresence>
     </div>
   )
 }
 
-export function Sky({ status, shift }: { status: Status; shift?: MotionValue<number> }) {
-  const v = VERDICTS[status]
+const STARS =
+  'radial-gradient(1.2px 1.2px at 12% 18%, #fff 50%, transparent), radial-gradient(1px 1px at 34% 8%, #fff 50%, transparent), radial-gradient(1.4px 1.4px at 58% 22%, #fff 50%, transparent), radial-gradient(1px 1px at 76% 12%, #fff 50%, transparent), radial-gradient(1.2px 1.2px at 88% 30%, #fff 50%, transparent), radial-gradient(1px 1px at 22% 36%, #fff 50%, transparent), radial-gradient(1px 1px at 66% 40%, #fff 50%, transparent)'
+
+function skyBackground(status: Status) {
+  const { top, mid, low, sun } = VERDICTS[status].sky
+  // o "sol" é um gradiente radial na mesma camada: nada de blur ao vivo
+  return `radial-gradient(60% 45% at 88% 0%, ${sun}, transparent 70%), linear-gradient(180deg, ${top} 0%, ${mid} 58%, ${low} 100%)`
+}
+
+export function Sky({ status, shift, paused = false }: { status: Status; shift?: MotionValue<number>; paused?: boolean }) {
   const reduce = useReducedMotion()
   const dark = status === 'NO' || status === 'REPROVADO'
   const t = reduce ? { duration: 0 } : SKY_EASE
 
   return (
-    <motion.div
-      className="absolute inset-0"
-      initial={false}
-      animate={{ '--top': v.sky.top, '--mid': v.sky.mid, '--low': v.sky.low } as never}
-      transition={t}
-      style={{ background: 'linear-gradient(180deg, var(--top) 0%, var(--mid) 58%, var(--low) 100%)' }}
-      aria-hidden
-    >
-      {/* sol / brilho */}
-      <motion.div
-        className="absolute -right-[20%] -top-[18%] aspect-square w-[90%] rounded-full mix-blend-screen blur-3xl lg:w-[55%] lg:-right-[5%]"
-        initial={false}
-        animate={{ backgroundColor: v.sky.sun }}
-        transition={t}
-      />
+    <div className="absolute inset-0 overflow-hidden" aria-hidden>
+      {/* crossfade só com opacity: o céu novo aparece por cima do anterior */}
+      <AnimatePresence initial={false}>
+        <m.div
+          key={status}
+          className="absolute inset-0 will-change-[opacity]"
+          style={{ background: skyBackground(status) }}
+          initial={{ opacity: 0, zIndex: 1 }}
+          animate={{ opacity: 1, zIndex: 1, transition: t }}
+          exit={{ opacity: 1, zIndex: 0, transition: { duration: t.duration } }}
+        />
+      </AnimatePresence>
 
-      {/* estrelas quando escurece */}
-      <motion.div
-        className="absolute inset-0"
+      <m.div
+        className="absolute inset-0 z-[2] will-change-[opacity]"
         initial={false}
         animate={{ opacity: dark ? 1 : 0 }}
         transition={t}
-        style={{
-          backgroundImage:
-            'radial-gradient(1.2px 1.2px at 12% 18%, #fff 50%, transparent), radial-gradient(1px 1px at 34% 8%, #fff 50%, transparent), radial-gradient(1.4px 1.4px at 58% 22%, #fff 50%, transparent), radial-gradient(1px 1px at 76% 12%, #fff 50%, transparent), radial-gradient(1.2px 1.2px at 88% 30%, #fff 50%, transparent), radial-gradient(1px 1px at 22% 36%, #fff 50%, transparent), radial-gradient(1px 1px at 66% 40%, #fff 50%, transparent)',
-        }}
+        style={{ backgroundImage: STARS }}
       />
 
-      {/* nuvens distantes */}
-      <motion.div
-        className="absolute inset-x-0 top-[12%] h-[40%]"
-        style={{ x: shift }}
-        initial={false}
-        animate={{ '--cloud': v.sky.cloud } as never}
-        transition={t}
-      >
+      <m.div className="absolute inset-x-0 top-[12%] z-[2] h-[40%] will-change-transform" style={{ x: shift }}>
         <div className="drift absolute inset-0" style={{ '--dur': '60s' } as CSSProperties}>
-          <CloudBank puffs={FAR} className="inset-0" />
+          <CloudBank variant="far" className="inset-0" color={VERDICTS[status].sky.cloud} animated />
         </div>
-      </motion.div>
+      </m.div>
 
-      {/* relâmpago */}
-      {status === 'REPROVADO' && !reduce && (
-        <motion.div
-          className="absolute inset-0 bg-white"
+      {status === 'REPROVADO' && !reduce && !paused && (
+        <m.div
+          className="absolute inset-0 z-[3] bg-white will-change-[opacity]"
           initial={{ opacity: 0 }}
           animate={{ opacity: [0, 0, 0.55, 0, 0.3, 0] }}
           transition={{ duration: 2.4, times: [0, 0.5, 0.53, 0.58, 0.62, 0.7], repeat: Infinity, repeatDelay: 1.6 }}
         />
       )}
-
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><filter id=%22n%22><feTurbulence baseFrequency=%22.9%22/></filter><rect width=%22120%22 height=%22120%22 filter=%22url(%23n)%22 opacity=%22.06%22/></svg>')]" />
-    </motion.div>
+    </div>
   )
 }
