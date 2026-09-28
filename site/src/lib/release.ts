@@ -5,9 +5,11 @@ export const RELEASES_URL = `${REPO}/releases/latest`
 
 export type Release = { version: string; apkUrl: string; sizeMb: number }
 
+// Reserva: o hub espelha cada release com um nome fixo, então este link
+// sempre aponta para o APK mais novo, mesmo se a API do GitHub falhar.
 const FALLBACK: Release = {
   version: '1.8',
-  apkUrl: `${REPO}/releases/download/v1.8/supaco-1.8.apk`,
+  apkUrl: 'https://github.com/kellyson71/supaco/releases/latest/download/supaco.apk',
   sizeMb: 17,
 }
 
