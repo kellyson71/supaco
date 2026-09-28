@@ -219,8 +219,8 @@ export function Tour() {
               />
             </AnimatePresence>
             <m.div
-              className="relative h-full max-h-[640px] [perspective:1400px]"
-              style={{ aspectRatio: '0.483' }}
+              className="relative h-full max-h-[640px] max-w-full [perspective:1400px]"
+              style={{ aspectRatio: '125 / 268' }}
               animate={reduce ? {} : isGecko ? { rotate: step.tilt / 4 } : { rotateY: step.tilt, rotateZ: step.tilt / 6 }}
               transition={{ type: 'spring', stiffness: 60, damping: 14 }}
             >

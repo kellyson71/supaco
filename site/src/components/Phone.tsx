@@ -4,15 +4,19 @@ import { LIMITE, VERDICTS, type Status } from '../lib/verdicts'
 
 export function PhoneFrame({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`relative rounded-[13%/6%] bg-[#0b0c10] p-[3.2%] shadow-[inset_0_0_0_1.5px_rgb(255_255_255/0.12)] ${className}`}>
+    <div className={`relative aspect-[125/268] ${className}`}>
       {/* sombra de chão em gradiente: nada de blur recalculado quando o celular gira */}
       <div
         className="pointer-events-none absolute -inset-x-[12%] -bottom-[7%] -z-10 h-[22%]"
         style={{ background: 'radial-gradient(closest-side, rgb(0 0 0 / 0.45), rgb(0 0 0 / 0))' }}
         aria-hidden
       />
-      <div className="screen relative aspect-[9/20] overflow-hidden rounded-[10.5%/4.8%] bg-ink">{children}</div>
-      <div className="absolute left-1/2 top-[2.4%] size-[3.4%] -translate-x-1/2 rounded-full bg-black ring-1 ring-white/10" />
+      <div className="relative size-full overflow-hidden rounded-[13%/6%] bg-[#0b0c10] p-[3.2%] shadow-[inset_0_0_0_1.5px_rgb(255_255_255/0.12)]">
+        <div className="screen relative size-full aspect-[9/20] overflow-hidden rounded-[10.5%/4.8%] bg-ink [transform:translateZ(0)]">
+          {children}
+        </div>
+        <div className="pointer-events-none absolute left-1/2 top-[2.4%] size-[3.4%] -translate-x-1/2 rounded-full bg-black ring-1 ring-white/10" />
+      </div>
     </div>
   )
 }
