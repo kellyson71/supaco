@@ -1,0 +1,77 @@
+name: Espelhar APK do Supaco Mobile
+
+# Toda release publicada em kellyson71/supaco-mobile ganha uma release igual
+# aqui, com o APK original, uma cópia com nome fixo (supaco.apk) e o SHA-256.
+# Assim este link sempre baixa a versão mais nova:
+#   https://github.com/kellyson71/supaco/releases/latest/download/supaco.apk
+on:
+  schedule:
+    - cron: '23 */3 * * *'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [supaco-mobile-release]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk-mirror
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SOURCE: kellyson71/supaco-mobile
+      HUB: ${{ github.repository }}
+    steps:
+      - name: Espelhar releases que ainda não existem aqui
+        run: |
+          set -euo pipefail
+
+          # releases publicadas (sem rascunho nem pré-release), da mais antiga para a mais nova
+          gh api "repos/$SOURCE/releases?per_page=100" \
+            --jq '[.[] | select(.draft == false and .prerelease == false)] | sort_by(.published_at) | .[].tag_name' > tags.txt
+          latest="$(tail -n 1 tags.txt || true)"
+          [ -n "$latest" ] || { echo "Nenhuma release publicada no $SOURCE."; exit 0; }
+
+          while read -r tag; do
+            if gh release view "$tag" -R "$HUB" >/dev/null 2>&1; then
+              echo "$tag já espelhada"
+              continue
+            fi
+
+            apk="$(gh api "repos/$SOURCE/releases/tags/$tag" --jq '[.assets[] | select(.name | endswith(".apk"))][0].name // empty')"
+            if [ -z "$apk" ]; then
+              echo "$tag não tem APK, pulando"
+              continue
+            fi
+
+            rm -rf dl && mkdir dl
+            gh release download "$tag" -R "$SOURCE" -p "$apk" -D dl
+            cp "dl/$apk" dl/supaco.apk
+            (cd dl && sha256sum "$apk" > "$apk.sha256")
+
+            title="$(gh api "repos/$SOURCE/releases/tags/$tag" --jq '.name // .tag_name')"
+            gh api "repos/$SOURCE/releases/tags/$tag" --jq '.body // ""' > original.md
+            {
+              echo "**Baixar:** [\`supaco.apk\`](https://github.com/$HUB/releases/download/$tag/supaco.apk) · Android 7.0 ou mais novo"
+              echo
+              echo "Espelhada automaticamente de [$SOURCE@$tag](https://github.com/$SOURCE/releases/tag/$tag)."
+              echo
+              echo "---"
+              echo
+              cat original.md
+            } > notes.md
+
+            latest_flag="--latest=false"
+            [ "$tag" = "$latest" ] && latest_flag="--latest"
+
+            gh release create "$tag" -R "$HUB" \
+              --title "$title" \
+              --notes-file notes.md \
+              "$latest_flag" \
+              "dl/$apk" dl/supaco.apk "dl/$apk.sha256"
+            echo "$tag espelhada"
+          done < tags.txt
