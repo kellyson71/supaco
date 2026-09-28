@@ -1,114 +1,107 @@
-<div align="center">
+<a href="https://kellyson71.github.io/supaco/"><img src="docs/banner.webp" alt="Supaco: posso faltar hoje? As faltas do SUAP do IFRN no celular, no terminal, no navegador e no Python." width="100%" /></a>
 
-<img src="site/public/assets/brand/app-icon.svg" width="96" alt="Ícone do Supaco" />
+<p align="center">
+  <a href="https://github.com/kellyson71/supaco/releases/latest/download/supaco.apk"><img src="docs/btn-android.png" alt="Baixar o APK para Android" height="54" /></a>
+  <a href="https://github.com/kellyson71/supaco-cli#instalação"><img src="docs/btn-cli.png" alt="Instalar o Supaco CLI no terminal" height="54" /></a>
+  <a href="https://supaco.vercel.app/"><img src="docs/btn-web.png" alt="Abrir o Supaco Web no navegador" height="54" /></a>
+  <a href="https://pypi.org/project/suapy/"><img src="docs/btn-python.png" alt="Instalar o SuaPy pelo PyPI" height="54" /></a>
+</p>
 
-# Supaco
-
-**Posso faltar hoje?** O SUAP do IFRN no celular, no terminal, no navegador e no Python.
-
-[![Baixar APK](https://img.shields.io/github/v/release/kellyson71/supaco-mobile?label=Baixar%20APK&logo=android&logoColor=white&color=1E7A47&style=for-the-badge)](https://github.com/kellyson71/supaco-mobile/releases/latest)
-[![Site](https://img.shields.io/badge/Site-kellyson71.github.io%2Fsupaco-F2C84B?style=for-the-badge&logo=githubpages&logoColor=black)](https://kellyson71.github.io/supaco/)
-[![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-2F4A80?style=for-the-badge)](LICENSE)
-
-[Site](https://kellyson71.github.io/supaco/) ·
-[App Android](#-supaco-mobile) ·
-[CLI](#-supaco-cli) ·
-[Web e desktop](#-supaco-web) ·
-[SuaPy](#-suapy)
+<p align="center">
+  <a href="https://github.com/kellyson71/supaco/releases/latest"><img src="https://img.shields.io/github/v/release/kellyson71/supaco?label=APK&color=1E7A47&style=flat-square" alt="Versão do APK" /></a>
+  <a href="https://kellyson71.github.io/supaco/"><img src="https://img.shields.io/badge/site-kellyson71.github.io%2Fsupaco-2F6FD0?style=flat-square" alt="Site" /></a>
+  <img src="https://img.shields.io/badge/Android-7.0%2B-121318?style=flat-square" alt="Android 7.0 ou mais novo" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-5b6475?style=flat-square" alt="Licença MIT" /></a>
+</p>
 
 <br />
 
-<img src="docs/preview-desktop.webp" alt="Site do Supaco com o céu mudando conforme o veredito" width="100%" />
+## Um veredito por matéria
 
-</div>
+O Supaco lê suas faltas direto na API do SUAP e aplica a regra dos 25% do IFRN. Cada matéria cai em um destes cinco:
 
----
+<img src="docs/vereditos.webp" alt="PODE FALTAR com 4 ou mais faltas livres, CALMA AÍ com 2 ou 3, ÚLTIMA BALA com 1, NEM PENSE com 0 e JÁ ERA quando passa dos 25%" width="100%" />
 
-## O que é
-
-O Supaco é um conjunto de projetos abertos e não oficiais para estudantes do IFRN. Todos falam direto com a API do SUAP, sem servidor no meio, e respondem a mesma pergunta: quantas faltas ainda dá pra dar em cada matéria.
-
-Este repositório é o **hub**: reúne os projetos como submódulos, guarda o site em `site/` e publica tudo no GitHub Pages.
-
-| Projeto | O que faz | Feito com | Onde usar |
-| --- | --- | --- | --- |
-| [**Supaco Mobile**](https://github.com/kellyson71/supaco-mobile) | App Android com veredito de faltas, widgets, alertas e modo offline | Kotlin · Jetpack Compose · Room | [APK](https://github.com/kellyson71/supaco-mobile/releases/latest) |
-| [**Supaco CLI**](https://github.com/kellyson71/supaco-cli) | Aulas, frequência, notas e notificações no terminal | Go · Bubble Tea · Lip Gloss | `yay -S supaco-cli` |
-| [**Supaco Web**](https://github.com/kellyson71/electron_supaco_IFRN-API) | Painel no navegador e app desktop, com assistente Gemini e Google Sala de Aula | React · Electron · Gemini | [supaco.vercel.app](https://supaco.vercel.app/) |
-| [**SuaPy**](https://github.com/kellyson71/suapy) | Biblioteca e CLI Python para a API do SUAP | Python 3.10+ | `pip install suapy` |
-| [**Site**](site/) | Esta landing page | Vite · React · Tailwind · framer-motion | [kellyson71.github.io/supaco](https://kellyson71.github.io/supaco/) |
-
-## Como tudo se conecta
-
-```mermaid
-flowchart LR
-    SUAP[("API do SUAP<br/>suap.ifrn.edu.br")]
-    Mobile["📱 Supaco Mobile<br/>Android"]
-    CLI["💻 Supaco CLI<br/>terminal"]
-    Web["🌐 Supaco Web<br/>navegador e desktop"]
-    Py["🐍 SuaPy<br/>Python"]
-    Site["✨ Site<br/>GitHub Pages"]
-
-    Mobile -- HTTPS --> SUAP
-    CLI -- HTTPS --> SUAP
-    Web -- HTTPS --> SUAP
-    Py -- HTTPS --> SUAP
-    Site -. link direto do APK .-> Mobile
-```
-
-Nenhum dos projetos guarda sua senha em servidor próprio. No app, as credenciais ficam criptografadas no aparelho.
-
----
-
-## 📱 Supaco Mobile
-
-O foco do ecossistema. Abre direto no veredito do dia e usa as mesmas regras de 25% de faltas do regulamento do IFRN.
-
-<div align="center">
-<img src="docs/preview-vereditos.webp" alt="Vereditos PODE FALTAR, ÚLTIMA BALA e JÁ ERA" width="100%" />
-</div>
-
-- Veredito por matéria: **PODE FALTAR**, **CALMA AÍ**, **ÚLTIMA BALA**, **NEM PENSE** e **JÁ ERA**
-- Três widgets de tela inicial e atalho no painel rápido
-- Notificação quando uma matéria entra no fio
-- Biometria, credenciais criptografadas e cache offline
-- Conquistas, streaks e ranking em “Eu, o réu”
+<table>
+  <tr>
+    <td width="170" align="center" valign="top">
+      <a href="https://github.com/kellyson71/supaco/releases/latest/download/supaco.apk"><img src="docs/qr-apk.svg" alt="QR code para baixar o APK" width="150" /></a>
+      <br /><sub>Aponte a câmera do celular</sub>
+    </td>
+    <td valign="top">
+      <b>Instalar no Android</b>
+      <ol>
+        <li>Baixe o <a href="https://github.com/kellyson71/supaco/releases/latest/download/supaco.apk"><code>supaco.apk</code></a> pelo celular.</li>
+        <li>Permita a instalação quando o Android pedir. É o aviso padrão para apps fora da Play Store.</li>
+        <li>Entre com a matrícula e a senha do SUAP.</li>
+      </ol>
+      <sub>A senha fica criptografada só no aparelho. O app fala apenas com <code>suap.ifrn.edu.br</code>, sem anúncios nem rastreadores.</sub>
+    </td>
+  </tr>
+</table>
 
 <p align="center">
-  <img src="site/public/assets/mobile/home.webp" width="19%" alt="Início" />
-  <img src="site/public/assets/mobile/materias.webp" width="19%" alt="Matérias" />
-  <img src="site/public/assets/mobile/widgets.webp" width="19%" alt="Widgets" />
-  <img src="site/public/assets/mobile/perfil.webp" width="19%" alt="Eu, o réu" />
-  <img src="site/public/assets/mobile/configuracoes.webp" width="19%" alt="Configurações" />
+  <img src="site/public/assets/mobile/home.webp" width="19%" alt="Tela Início com o veredito do dia" />
+  <img src="site/public/assets/mobile/materias.webp" width="19%" alt="Tela Matérias com frequência e faltas livres" />
+  <img src="site/public/assets/mobile/widgets.webp" width="19%" alt="Widgets na tela inicial" />
+  <img src="site/public/assets/mobile/perfil.webp" width="19%" alt="Tela Eu, o réu com estatísticas" />
+  <img src="site/public/assets/mobile/configuracoes.webp" width="19%" alt="Configurações com biometria e alertas" />
 </p>
 
-**Instalar:** baixe o APK em [Releases](https://github.com/kellyson71/supaco-mobile/releases/latest), permita a instalação pelo navegador e entre com sua matrícula do SUAP. Requer Android 7.0 ou mais novo.
+## O ecossistema
 
-## 💻 Supaco CLI
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/icons/mobile.svg" width="44" align="left" alt="" />
+      <b>Supaco Mobile</b><br />
+      <sub>Kotlin · Jetpack Compose</sub>
+      <br clear="left" />
+      <p>Veredito do dia, widgets, atalho no painel rápido, alertas antes do limite e modo offline.</p>
+      <a href="https://github.com/kellyson71/supaco-mobile">Código</a> ·
+      <a href="https://github.com/kellyson71/supaco/releases/latest">Releases</a>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/icons/cli.svg" width="44" align="left" alt="" />
+      <b>Supaco CLI</b><br />
+      <sub>Go · Bubble Tea</sub>
+      <br clear="left" />
+      <p>Aulas de hoje, grade da semana, frequência, notas e notificações sem sair do terminal.</p>
+      <a href="https://github.com/kellyson71/supaco-cli">Código</a> ·
+      <code>yay -S supaco-cli</code>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/icons/web.svg" width="44" align="left" alt="" />
+      <b>Supaco Web</b><br />
+      <sub>React · Electron · Gemini</sub>
+      <br clear="left" />
+      <p>Painel no navegador e app desktop, com assistente que conhece suas notas e o Google Sala de Aula.</p>
+      <a href="https://github.com/kellyson71/electron_supaco_IFRN-API">Código</a> ·
+      <a href="https://supaco.vercel.app/">supaco.vercel.app</a>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/icons/python.svg" width="44" align="left" alt="" />
+      <b>SuaPy</b><br />
+      <sub>Python 3.10+</sub>
+      <br clear="left" />
+      <p>Biblioteca e CLI para boletim, faltas, horários e avaliações, com exportação para CSV, JSON e Pandas.</p>
+      <a href="https://github.com/kellyson71/suapy">Código</a> ·
+      <a href="https://kellyson71.github.io/suapy/">Documentação</a>
+    </td>
+  </tr>
+</table>
 
-<img src="site/public/assets/cli/menu.png" alt="Menu do Supaco CLI" width="100%" />
+<details>
+<summary><b>Comandos de instalação</b></summary>
 
 ```bash
+# Supaco CLI
 yay -S supaco-cli                                   # Arch, Manjaro, CachyOS
 go install github.com/kellyson71/supaco-cli@latest  # qualquer sistema com Go
-```
 
-## 🌐 Supaco Web
-
-Painel no navegador e app desktop (Electron). Tem um assistente Gemini que conhece suas notas e faltas, e integra o Google Sala de Aula.
-
-<p align="center">
-  <img src="site/public/assets/web/login.webp" width="49%" alt="Tela de entrada do Supaco Web" />
-  <img src="site/public/assets/web/faltas.webp" width="49%" alt="Controle de faltas do Supaco Web" />
-</p>
-
-Acesse em **[supaco.vercel.app](https://supaco.vercel.app/)**.
-
-## 🐍 SuaPy
-
-<img src="site/public/assets/suapy/suapy-wordmark.webp" alt="SuaPy" height="64" />
-
-```bash
+# SuaPy
 pip install suapy
 ```
 
@@ -122,70 +115,70 @@ with Suap() as suap:
         print(d["disciplina"], d["numero_faltas"])
 ```
 
-Documentação: [kellyson71.github.io/suapy](https://kellyson71.github.io/suapy/)
+</details>
 
----
+<details>
+<summary><b>Como os APKs chegam nas releases</b></summary>
 
-## Estrutura do repositório
+<br />
+
+O workflow [`apk.yml`](.github/workflows/apk.yml) confere as releases do [`supaco-mobile`](https://github.com/kellyson71/supaco-mobile/releases) a cada três horas. Cada versão nova vira uma release aqui, com o mesmo número, contendo:
+
+- o APK original
+- `supaco.apk`, uma cópia com nome fixo
+- o `.sha256` para conferir o arquivo
+
+Por causa do nome fixo, este link sempre baixa a versão mais nova:
+
+```
+https://github.com/kellyson71/supaco/releases/latest/download/supaco.apk
+```
+
+Para espelhar na hora, rode o workflow pela aba **Actions**.
+
+</details>
+
+<details>
+<summary><b>Organização deste repositório</b></summary>
+
+<br />
+
+Este é o hub do Supaco. O código de cada produto vive no próprio repositório e entra aqui como submódulo.
 
 ```
 supaco/
-├── site/                  landing page (Vite + React), publicada no GitHub Pages
-│   ├── public/assets/     telas reais, ícone, logos e mascotes
-│   └── src/
-│       ├── components/    Hero, Tour, Alerts, Ecosystem, Download…
-│       └── lib/           regras de veredito, release do APK, parallax
-├── projetos/              submódulos com o código de cada produto
-│   ├── supaco-mobile/
-│   ├── supaco-cli/
-│   ├── supaco-web/
-│   └── suapy/
-├── docs/                  imagens deste README
-└── .github/workflows/     deploy do site
+├── site/        landing page (Vite, React, Tailwind, framer-motion)
+├── projetos/    supaco-mobile, supaco-cli, supaco-web e suapy (submódulos)
+├── docs/        imagens deste README
+└── .github/     deploy do site e espelho dos APKs
 ```
-
-### Clonar com todos os projetos
 
 ```bash
 git clone --recurse-submodules https://github.com/kellyson71/supaco.git
-# ou, se já clonou:
-git submodule update --init --recursive
+git submodule update --remote --merge   # atualiza todos os projetos
 ```
 
-Para trazer a versão mais nova de todos:
+</details>
 
-```bash
-git submodule update --remote --merge
-```
+<details>
+<summary><b>Rodar o site</b></summary>
 
-### Rodar o site
+<br />
 
 ```bash
 cd site
 npm install
 npm run dev     # http://localhost:5173
-npm run build   # gera site/dist
 ```
 
-O botão **Baixar APK** busca o `.apk` da última release do `supaco-mobile` pela API do GitHub. Se a API falhar, usa o link fixo em `site/src/lib/release.ts`.
+`?f=0` até `?f=12` na URL abre o topo em um veredito específico. Todo push em `main` que mexe em `site/` publica no GitHub Pages.
 
-Com `?f=0` até `?f=12` na URL, o topo abre direto num veredito. `?f=11`, por exemplo, mostra o céu noturno do JÁ ERA.
+</details>
 
-Todo push em `main` que mexe em `site/` publica uma nova versão no GitHub Pages.
+<br />
 
----
-
-## Outros repositórios
-
-| Repositório | Status |
-| --- | --- |
-| `supaco-react` | Versão original do Supaco Web como PWA (privado) |
-| `OALD-Team/supaco-2` | SUPACO Native em React Native e Expo, antecessor do app Android (privado) |
-
-## Aviso
-
-Projeto não oficial, feito por estudante, sem vínculo com o IFRN. Use sua própria matrícula e senha do SUAP.
-
-## Licença
-
-[MIT](LICENSE) © Kellyson
+<p align="center">
+  <img src="docs/icons/mobile.svg" width="28" alt="" /><br />
+  <sub>Projeto não oficial, feito por estudante, sem vínculo com o IFRN.<br />
+  <a href="LICENSE">MIT</a> · Kellyson</sub>
+</p>
