@@ -1,6 +1,7 @@
-import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { m, AnimatePresence, useInView, useMotionValueEvent, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
 import { PhoneFrame } from './Phone'
+import { isGecko } from '../lib/engine'
 
 // Coordenadas em px dos screenshots originais (720 × 1600)
 type Box = [number, number, number, number]
@@ -91,24 +92,29 @@ const pct = ([x1, y1, x2, y2]: Box) => ({
 
 function Screen({ step, dir }: { step: Step; dir: number }) {
   return (
-    <motion.div
-      className="absolute inset-0"
+    <m.div
+      className="absolute inset-0 will-change-transform"
       custom={dir}
       variants={{
-        enter: (d: number) => ({ y: d > 0 ? '100%' : '-30%', scale: d > 0 ? 1 : 0.94, filter: 'brightness(0.5)' }),
-        show: { y: 0, scale: 1, filter: 'brightness(1)', zIndex: 2 },
-        exit: (d: number) => ({ y: d > 0 ? '-30%' : '100%', scale: d > 0 ? 0.94 : 1, filter: 'brightness(0.5)', zIndex: d > 0 ? 1 : 3 }),
+        enter: (d: number) => ({ y: d > 0 ? '100%' : '-30%', scale: d > 0 ? 1 : 0.94 }),
+        show: { y: 0, scale: 1, zIndex: 2 },
+        exit: (d: number) => ({ y: d > 0 ? '-30%' : '100%', scale: d > 0 ? 0.94 : 1, zIndex: d > 0 ? 1 : 3 }),
       }}
       initial="enter"
       animate="show"
       exit="exit"
       transition={{ type: 'spring', stiffness: 170, damping: 26 }}
     >
-      <img src={step.src} alt={`Tela ${step.tab} do Supaco`} className="absolute inset-0 size-full object-cover" />
+      <img src={step.src} alt={`Tela ${step.tab} do Supaco`} className="absolute inset-0 size-full object-cover" decoding="async" />
+      {/* escurece a tela que sai/entra só com opacity (filter animado custa caro no celular) */}
+      <m.div
+        className="pointer-events-none absolute inset-0 z-10 bg-black will-change-[opacity]"
+        variants={{ enter: { opacity: 0.5 }, show: { opacity: 0 }, exit: { opacity: 0.5 } }}
+      />
 
       {step.widgets &&
         WIDGETS.map((w, i) => (
-          <motion.img
+          <m.img
             key={w.src}
             src={w.src}
             alt=""
@@ -121,7 +127,7 @@ function Screen({ step, dir }: { step: Step; dir: number }) {
         ))}
 
       {step.callouts.map((c, i) => (
-        <motion.div
+        <m.div
           key={c.label}
           className="absolute rounded-[3.5cqw] ring-[0.7cqw] ring-warn"
           style={pct(c.box)}
@@ -136,9 +142,9 @@ function Screen({ step, dir }: { step: Step; dir: number }) {
           >
             {c.label}
           </span>
-        </motion.div>
+        </m.div>
       ))}
-    </motion.div>
+    </m.div>
   )
 }
 
@@ -147,7 +153,7 @@ function Progress({ progress, i }: { progress: MotionValue<number>; i: number })
   const scaleX = useTransform(progress, [i / n, (i + 1) / n], [0, 1])
   return (
     <span className="relative h-1 flex-1 overflow-hidden rounded-full bg-ink/10">
-      <motion.span className="absolute inset-0 origin-left rounded-full bg-ink" style={{ scaleX }} />
+      <m.span className="absolute inset-0 origin-left rounded-full bg-ink will-change-transform" style={{ scaleX }} />
     </span>
   )
 }
@@ -157,6 +163,17 @@ export function Tour() {
   const reduce = useReducedMotion()
   const [[index, dir], setIndex] = useState<[number, number]>([0, 1])
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
+  const near = useInView(ref, { once: true, margin: '800px 0px' })
+
+  // decodifica as telas antes: a troca não engasga no celular
+  useEffect(() => {
+    if (!near) return
+    for (const src of [...STEPS.map((s) => s.src), ...WIDGETS.map((w) => w.src)]) {
+      const img = new Image()
+      img.src = src
+      img.decode?.().catch(() => {})
+    }
+  }, [near])
 
   useMotionValueEvent(scrollYProgress, 'change', (p) => {
     const next = Math.min(STEPS.length - 1, Math.max(0, Math.floor(p * STEPS.length)))
@@ -178,7 +195,7 @@ export function Tour() {
           {/* celular */}
           <div className="relative flex min-h-0 items-center justify-center lg:order-2 lg:h-[min(660px,82svh)]">
             <AnimatePresence initial={false}>
-              <motion.div
+              <m.div
                 key={step.tab}
                 className="pointer-events-none absolute inset-0 grid place-items-center overflow-hidden font-display text-[26vw] font-extrabold leading-none tracking-tighter text-ink/[0.045] lg:text-[11vw]"
                 initial={{ opacity: 0, y: dir * 60 }}
@@ -188,17 +205,23 @@ export function Tour() {
                 aria-hidden
               >
                 <span className="whitespace-nowrap">{step.tab}</span>
-              </motion.div>
+              </m.div>
             </AnimatePresence>
-            <motion.div
-              className="absolute aspect-square w-[70%] max-w-[420px] rounded-full blur-3xl"
-              animate={{ backgroundColor: step.glow, opacity: 0.45 }}
-              transition={{ duration: 0.8 }}
-            />
-            <motion.div
+            <AnimatePresence initial={false}>
+              <m.div
+                key={step.glow + step.tab}
+                className="absolute aspect-square w-[90%] max-w-[560px] rounded-full will-change-[opacity]"
+                style={{ background: `radial-gradient(closest-side, ${step.glow}80, ${step.glow}00)` }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.8 }}
+              />
+            </AnimatePresence>
+            <m.div
               className="relative h-full max-h-[640px] [perspective:1400px]"
               style={{ aspectRatio: '0.483' }}
-              animate={reduce ? {} : { rotateY: step.tilt, rotateZ: step.tilt / 6 }}
+              animate={reduce ? {} : isGecko ? { rotate: step.tilt / 4 } : { rotateY: step.tilt, rotateZ: step.tilt / 6 }}
               transition={{ type: 'spring', stiffness: 60, damping: 14 }}
             >
               <PhoneFrame className="h-full">
@@ -206,7 +229,7 @@ export function Tour() {
                   <Screen key={step.tab} step={step} dir={dir} />
                 </AnimatePresence>
               </PhoneFrame>
-            </motion.div>
+            </m.div>
           </div>
 
           {/* texto */}
@@ -233,7 +256,7 @@ export function Tour() {
             </div>
             <div className="relative mt-4 min-h-[8.5rem] lg:mt-8 lg:min-h-[16rem]">
               <AnimatePresence mode="wait" initial={false} custom={dir}>
-                <motion.div
+                <m.div
                   key={step.tab}
                   initial={{ opacity: 0, y: dir * 24 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -242,7 +265,7 @@ export function Tour() {
                 >
                   <h2 className="font-display text-[clamp(1.5rem,6.4vw,3.4rem)] font-bold leading-[1.02] tracking-[-0.03em]">{step.title}</h2>
                   <p className="mt-2.5 max-w-md text-[15px] leading-relaxed text-slate lg:mt-5 lg:text-[17px]">{step.text}</p>
-                </motion.div>
+                </m.div>
               </AnimatePresence>
             </div>
           </div>

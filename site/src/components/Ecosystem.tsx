@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useTransform } from 'framer-motion'
+import { m, AnimatePresence, useInView, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { CopyChip, GithubIcon } from './ui'
@@ -51,7 +51,7 @@ function Terminal() {
         </div>
         <AnimatePresence mode="wait">
           {screen >= 0 && (
-            <motion.img
+            <m.img
               key={screen}
               src={CLI_SCREENS[screen].src}
               alt={CLI_SCREENS[screen].alt}
@@ -101,7 +101,7 @@ function Browser() {
         </div>
         <div className="relative aspect-[1918/1038] overflow-hidden">
           <AnimatePresence initial={false}>
-            <motion.img
+            <m.img
               key={s.src}
               src={s.src}
               alt={`Supaco Web: ${s.label}`}
@@ -127,7 +127,7 @@ function Browser() {
               n === i ? 'text-ink' : 'bg-white/[0.06] text-white/60 hover:text-white'
             }`}
           >
-            {n === i && <motion.span layoutId="web-tab" className="absolute inset-0 rounded-full bg-white" transition={{ type: 'spring', stiffness: 400, damping: 32 }} />}
+            {n === i && <m.span layoutId="web-tab" className="absolute inset-0 rounded-full bg-white" transition={{ type: 'spring', stiffness: 400, damping: 32 }} />}
             <span className="relative">{w.label}</span>
           </button>
         ))}
@@ -140,7 +140,7 @@ function Browser() {
 
 function ProductCard({ children, className = '', delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
   return (
-    <motion.article
+    <m.article
       className={`relative overflow-hidden rounded-[32px] bg-ink-2 p-5 ring-1 ring-white/[0.06] sm:p-7 ${className}`}
       initial={{ opacity: 0, y: 60, scale: 0.97 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -148,7 +148,7 @@ function ProductCard({ children, className = '', delay = 0 }: { children: ReactN
       transition={{ duration: 0.9, ease, delay }}
     >
       {children}
-    </motion.article>
+    </m.article>
   )
 }
 
@@ -190,7 +190,7 @@ function PythonCode() {
   return (
     <pre ref={ref} className="no-scrollbar overflow-x-auto rounded-xl bg-[#0a0b0e] p-4 font-mono text-[11.5px] leading-[1.7] text-white/80 ring-1 ring-white/10 sm:text-[12.5px]">
       {PY.map(([kind, t], i) => (
-        <motion.span
+        <m.span
           key={i}
           className={kind === 'k' ? 'text-[#c4a7ff]' : kind === 's' ? 'text-go' : kind === 'n' ? 'text-warn' : ''}
           initial={{ opacity: 0 }}
@@ -198,7 +198,7 @@ function PythonCode() {
           transition={{ duration: 0.01, delay: i * 0.06 }}
         >
           {t}
-        </motion.span>
+        </m.span>
       ))}
     </pre>
   )
@@ -207,18 +207,14 @@ function PythonCode() {
 export function Ecosystem() {
   const ref = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'start start'] })
-  const radius = useTransform(scrollYProgress, [0, 1], [120, 40])
-  const inset = useTransform(scrollYProgress, [0, 1], ['4%', '0%'])
+  // só transform no scroll: o fundo "abre" até a largura toda sem mexer no layout
+  const scaleX = useTransform(scrollYProgress, [0, 1], [0.92, 1])
 
   return (
-    <motion.section
-      id="ecossistema"
-      ref={ref}
-      className="relative bg-ink py-20 text-white lg:py-32"
-      style={{ borderRadius: radius, marginInline: inset }}
-    >
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <motion.div
+    <section id="ecossistema" ref={ref} className="relative py-20 text-white lg:py-32">
+      <m.div className="absolute inset-0 rounded-[40px] bg-ink will-change-transform" style={{ scaleX }} aria-hidden />
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+        <m.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.6 }}
@@ -231,7 +227,7 @@ export function Ecosystem() {
           <p className="mt-4 max-w-lg text-[17px] leading-relaxed text-white/60">
             O mesmo SUAP, do jeito que cada um prefere. Todos são abertos e falam direto com a API do IFRN.
           </p>
-        </motion.div>
+        </m.div>
 
         <div className="mt-12 grid gap-4 lg:mt-16 lg:grid-cols-2 lg:gap-5">
           <ProductCard className="lg:col-span-2 lg:grid lg:grid-cols-[0.75fr_1fr] lg:items-center lg:gap-10">
@@ -267,7 +263,7 @@ export function Ecosystem() {
             </a>
             <div className="relative mt-8">
               <Browser />
-              <motion.img
+              <m.img
                 src="./assets/web/ia-chat.webp"
                 alt="Assistente Gemini respondendo sobre faltas"
                 loading="lazy"
@@ -299,7 +295,7 @@ export function Ecosystem() {
               <div className="min-w-0 flex-1">
                 <CopyChip text="pip install suapy" />
               </div>
-              <motion.img
+              <m.img
                 src="./assets/brand/python.svg"
                 alt="Python"
                 className="size-11 shrink-0 rounded-xl bg-white/[0.06] p-2"
@@ -320,6 +316,6 @@ export function Ecosystem() {
           </ProductCard>
         </div>
       </div>
-    </motion.section>
+    </section>
   )
 }

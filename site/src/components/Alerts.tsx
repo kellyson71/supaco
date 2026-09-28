@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { Bell, Fingerprint, LayoutGrid, ToggleRight, Trophy, WifiOff } from 'lucide-react'
 import { useRef } from 'react'
 import { Logo } from './ui'
@@ -33,7 +33,7 @@ export function Alerts() {
       <div className="mx-auto grid max-w-6xl gap-14 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-20">
         {/* painel de notificações + figurinhas arrastáveis */}
         <div ref={area} className="relative order-2 pb-44 pt-48 lg:order-1 lg:py-28">
-          <motion.div
+          <m.div
             className="relative z-10 mx-auto max-w-[360px] rounded-[32px] bg-ink p-3 shadow-[0_40px_80px_-30px_rgb(18_19_24/0.6)]"
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -46,7 +46,7 @@ export function Alerts() {
             </div>
             <ul className="space-y-2">
               {NOTIFICATIONS.map((n, i) => (
-                <motion.li
+                <m.li
                   key={n.title}
                   className="rounded-[22px] bg-ink-3 p-3.5 text-white"
                   initial={{ opacity: 0, y: -24, scale: 0.94 }}
@@ -60,13 +60,13 @@ export function Alerts() {
                   </div>
                   <div className="mt-1.5 text-[14px] font-semibold leading-snug">{n.title}</div>
                   <div className="text-[13px] leading-snug text-white/70">{n.text}</div>
-                </motion.li>
+                </m.li>
               ))}
             </ul>
-          </motion.div>
+          </m.div>
 
           {STICKERS.map((s, i) => (
-            <motion.figure
+            <m.figure
               key={s.label}
               drag
               dragConstraints={area}
@@ -79,17 +79,17 @@ export function Alerts() {
               viewport={{ once: true }}
               transition={{ type: 'spring', stiffness: 200, damping: 14, delay: 0.2 + i * 0.25 }}
             >
-              <img src={s.src} alt="" draggable={false} className="aspect-[4/3] w-full rounded-xl object-cover" />
+              <img src={s.src} alt="" loading="lazy" decoding="async" draggable={false} className="aspect-[4/3] w-full rounded-xl object-cover" />
               <figcaption className="mt-2 flex items-center gap-1.5 px-1 font-display text-[11px] font-bold tracking-tight">
                 <span className="size-2 rounded-full" style={{ background: s.color }} />
                 {s.label}
               </figcaption>
-            </motion.figure>
+            </m.figure>
           ))}
         </div>
 
         <div className="order-1 lg:order-2">
-          <motion.h2
+          <m.h2
             className="font-display text-[clamp(2rem,8vw,3.6rem)] font-bold leading-[1.02] tracking-[-0.03em]"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -97,13 +97,13 @@ export function Alerts() {
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
             Ele avisa antes. Do jeito dele.
-          </motion.h2>
+          </m.h2>
           <p className="mt-4 max-w-md text-[17px] leading-relaxed text-slate">
             Você não precisa lembrar de abrir o app. Quando a conta aperta, o Supaco manda notificação.
           </p>
           <ul className="mt-10 grid gap-x-8 gap-y-7 sm:grid-cols-2">
             {FEATURES.map((f, i) => (
-              <motion.li
+              <m.li
                 key={f.title}
                 className="flex gap-3.5"
                 initial={{ opacity: 0, y: 20 }}
@@ -118,7 +118,7 @@ export function Alerts() {
                   <h3 className="text-[15px] font-semibold">{f.title}</h3>
                   <p className="mt-0.5 text-[14px] leading-snug text-slate">{f.text}</p>
                 </div>
-              </motion.li>
+              </m.li>
             ))}
           </ul>
         </div>

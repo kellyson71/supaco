@@ -1,10 +1,10 @@
-import { motion, useAnimationFrame, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform, useVelocity, wrap } from 'framer-motion'
+import { m, useAnimationFrame, useInView, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform, useVelocity, wrap } from 'framer-motion'
 import { useRef } from 'react'
 import { VERDICTS, type Status } from '../lib/verdicts'
 
 const ORDER: Status[] = ['GO', 'WARN', 'LAST', 'NO', 'REPROVADO']
 
-function Row({ base, dark = false }: { base: number; dark?: boolean }) {
+function Row({ base, dark = false, active }: { base: number; dark?: boolean; active: boolean }) {
   const reduce = useReducedMotion()
   const x = useMotionValue(0)
   const { scrollY } = useScroll()
@@ -14,7 +14,8 @@ function Row({ base, dark = false }: { base: number; dark?: boolean }) {
   const dirRef = useRef(1)
 
   useAnimationFrame((_, delta) => {
-    if (reduce) return
+    // fora da tela não gasta frame nenhum
+    if (reduce || !active) return
     const b = boost.get()
     if (b < 0) dirRef.current = -1
     else if (b > 0) dirRef.current = 1
@@ -24,7 +25,7 @@ function Row({ base, dark = false }: { base: number; dark?: boolean }) {
 
   const items = [...ORDER, ...ORDER, ...ORDER, ...ORDER]
   return (
-    <motion.div className="flex w-max" style={{ x: tx, skewX: skew }}>
+    <m.div className="flex w-max will-change-transform" style={{ x: tx, skewX: active ? skew : 0 }}>
       {items.map((s, i) => {
         const v = VERDICTS[s]
         return (
@@ -34,19 +35,21 @@ function Row({ base, dark = false }: { base: number; dark?: boolean }) {
           </span>
         )
       })}
-    </motion.div>
+    </m.div>
   )
 }
 
 // Faixa com os cinco vereditos, que acelera com a rolagem
 export function Band() {
+  const ref = useRef<HTMLElement>(null)
+  const active = useInView(ref, { margin: '100px 0px' })
   return (
-    <section aria-label="Os cinco vereditos do Supaco" className="relative overflow-hidden py-10 lg:py-14">
+    <section ref={ref} aria-label="Os cinco vereditos do Supaco" className="relative overflow-hidden py-10 lg:py-14">
       <div className="-mx-10 -rotate-2 bg-ink py-3 sm:py-4">
-        <Row base={-3} dark />
+        <Row base={-3} dark active={active} />
       </div>
       <div className="-mx-10 mt-2 rotate-1 py-1 opacity-80">
-        <Row base={2} />
+        <Row base={2} active={active} />
       </div>
     </section>
   )
